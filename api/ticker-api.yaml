@@ -1,0 +1,133 @@
+openapi: "3.0.0"
+
+info:
+  title: Realtime ticker statistics
+  description: API to provide realtime ticker statistics
+  version: 0.0.1
+  contact:
+    name: Oleksandr Volynets
+    email: oleksandr.volynets@gmail.com
+
+servers:
+  - url: https://example.com/api
+
+paths:
+  /ticks:
+    post:
+      description: Submit ticker data
+      requestBody:
+        content:
+          description: Ticker data at a given moment in time
+          application/json:
+            schema:
+              $ref: '#/components/schema/TickerPayload'
+      responses:
+        200:
+          description: OK
+        204:
+          description: Ticker data older than 60 seconds is ignored
+  /statistics:
+    get:
+      description: Return overall statistics on the ticker data for the past 60 seconds
+      parameters:
+        - name: id
+          description: unique identifier of the feature
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /statistics/{id}:
+    get:
+      description: Return ticker statistics for a given instrument ID for the past 60 seconds
+      parameters:
+        - name: id
+          description: Unique identifier of the instrument
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+
+components:
+  schemas:
+    TickerPayload:
+      type: "object"
+      required:
+        - "instrument"
+        - "price"
+        - "timestamp"
+      properties:
+        instrument:
+          type: string
+          description: Unique identifier of an instrument
+        price:
+          type: number
+          format: double
+          description: Price at a given time
+        timestamp:
+          type: number
+          format: int64
+          description: Timestamp of the data point
+
+    Response:
+      type: "object"
+      required:
+      - "avg"
+      - "max"
+      - "min"
+      - "count"
+      properties:
+        avg:
+          type: number
+          format: double
+          description: Average tick price in the last 60 seconds
+        max:
+          type: number
+          format: double
+          description: Maximum tick price in the last 60 seconds
+        min:
+          type: number
+          format: double
+          description: Minimum tick price in the last 60 seconds
+        count:
+          type: number
+          format: int64
+          description: Total number of ticks happened in the last 60 seconds
+
+# Would be also nice to return a Problem object for non-successful responses to clarify an issue
+#
+#    Problem:
+#      type: object
+#      required:
+#        - type
+#      properties:
+#        type:
+#          type: string
+#          format: uri
+#          example: 'http://httpstatus.es/503'
+#        title:
+#          type: string
+#          example: Service Unavailable
+#        status:
+#          type: integer
+#          format: int32
+#          example: 503
+#        detail:
+#          type: string
+#          example: Connection to database timed out
+#        instance:
+#          type: string
+#          format: uri
