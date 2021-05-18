@@ -2,7 +2,6 @@ package de.ovolynets.tickerstats.controller;
 
 import java.util.Optional;
 
-import de.ovolynets.tickerstats.service.TickerResponse;
 import de.ovolynets.tickerstats.service.TickerService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,14 +38,14 @@ public class APIController {
     }
 
     @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<TickerResponse> getStatistics() {
-        Optional<TickerResponse> result = tickerService.getStatistics();
+    ResponseEntity<TickerStatistics> getStatistics() {
+        Optional<TickerStatistics> result = tickerService.getStatistics();
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/statistics/{instrumentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<TickerResponse> getStatistics(@PathVariable("instrumentId") final String instrumentId) {
-        Optional<TickerResponse> result = tickerService.getStatistics(instrumentId);
+    ResponseEntity<TickerStatistics> getStatistics(@PathVariable("instrumentId") final String instrumentId) {
+        Optional<TickerStatistics> result = tickerService.getStatistics(instrumentId);
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

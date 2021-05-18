@@ -7,11 +7,22 @@ public class Tick {
     private final Double price;
     private final Long timestamp;
 
-
     public Tick(String instrument, Double price, Long timestamp) {
         this.instrument = instrument;
         this.price = price;
         this.timestamp = timestamp;
+    }
+
+    public String getInstrument() {
+        return instrument;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
     }
 
     public boolean isValid() {

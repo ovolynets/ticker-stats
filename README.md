@@ -18,4 +18,10 @@ You can find the OpenAPI 3.0 definition in `api/ticker-api.yaml` file.
 
 ## Tradeoffs, nice-to-haves, decisions, TODOs
 
-1. TicksPostResponse to provide a more detailed message about the status of the API call
+1. I didn't use annotations processors (lombok) to reduce the boilerplate code - is a personal preference but can
+be done of course
+2. TicksPostResponse to provide a more detailed message about the status of the API call
+3. Concurrency is not tested, although it would be nice to stress-test it a bit.
+
+Long-term improvements
+1. Load test - definitely. Concurrency check, possibly stress testing to estimate the highest possible traffic.
