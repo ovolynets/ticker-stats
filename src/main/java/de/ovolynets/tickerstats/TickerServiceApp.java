@@ -7,8 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan("de.ovolynets.tickerstats")
 @SpringBootApplication
-public class MainApp {
+public class TickerServiceApp {
     public static void main(final String... args) {
-        SpringApplication.run(MainApp.class, args);
+        SpringApplication.run(TickerServiceApp.class, args);
     }
 }
