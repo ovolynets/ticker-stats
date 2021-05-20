@@ -43,7 +43,7 @@ public class TickerServiceImpl implements TickerService {
     // Frequently updated cache for the statistics per instrument
     private final Map<String, TickerStatistics> statisticsIndexByInstrument = new ConcurrentHashMap<>();
 
-    public TickerServiceImpl(@Value("${index-update-period-ms}:500") int indexUpdatePeriodMillis) {
+    public TickerServiceImpl(@Value("${index-update-period-ms:500}") int indexUpdatePeriodMillis) {
         // Schedule statistics updates in regular intervals
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(this::rebuildStatisticsIndex, 0, indexUpdatePeriodMillis, TimeUnit.MILLISECONDS);
@@ -118,12 +118,16 @@ public class TickerServiceImpl implements TickerService {
                     TickerAccumulator accumulator = indexOfPricesByInstrument.computeIfAbsent(instrument, (ignored) -> new TickerAccumulator());
                     accumulator.sum += price;
                     accumulator.max = Math.max(price, accumulator.max);
-                    accumulator.min = Math.min(price, accumulator.min);
+                    accumulator.min = accumulator.min > 0
+                            ? Math.min(price, accumulator.min)
+                            : price;
                     accumulator.count += 1;
 
                     totalIndexAccumulator.sum += price;
                     totalIndexAccumulator.max = Math.max(price, totalIndexAccumulator.max);
-                    totalIndexAccumulator.min = Math.max(price, totalIndexAccumulator.min);
+                    totalIndexAccumulator.min = totalIndexAccumulator.min > 0
+                            ? Math.min(price, totalIndexAccumulator.min)
+                            : price;
                     totalIndexAccumulator.count += 1;
                 }
             }
@@ -143,7 +147,7 @@ public class TickerServiceImpl implements TickerService {
     private static class TickerAccumulator {
         private double sum;
         private double max;
-        private double min = Double.MAX_VALUE;
+        private double min;
         private long count;
 
         private TickerStatistics toTickerStatistics() {

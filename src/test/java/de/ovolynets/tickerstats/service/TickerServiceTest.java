@@ -3,12 +3,13 @@ package de.ovolynets.tickerstats.service;
 import de.ovolynets.tickerstats.controller.Tick;
 import de.ovolynets.tickerstats.controller.TickerStatistics;
 import de.ovolynets.tickerstats.service.impl.TickerServiceImpl;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TickerServiceTest {
 
@@ -43,8 +44,17 @@ public class TickerServiceTest {
 
         Thread.sleep(100);
         TickerStatistics tickerStatistics = tickerService.getStatistics();
-        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
-        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(3);
+        assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
+        assertThat(tickerStatistics.getCount()).isEqualTo(3);
+    }
+
+    @Test
+    public void requestEmptyStatistics() {
+        TickerStatistics tickerStatistics = tickerService.getStatistics();
+        assertThat(tickerStatistics.getAvg()).isEqualTo(0);
+        assertThat(tickerStatistics.getMax()).isEqualTo(0);
+        assertThat(tickerStatistics.getMin()).isEqualTo(0);
+        assertThat(tickerStatistics.getCount()).isEqualTo(0);
     }
 
     @Test
@@ -57,14 +67,14 @@ public class TickerServiceTest {
         // First, both ticks contribute to the statistics
         Thread.sleep(100);
         TickerStatistics tickerStatistics = tickerService.getStatistics();
-        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1+PRICE2)/2);
-        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(2);
+        assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1+PRICE2)/2);
+        assertThat(tickerStatistics.getCount()).isEqualTo(2);
 
         // After waiting for another 100ms another round of statistics rebuild and cleanup of old values has been run
         Thread.sleep(100);
         tickerStatistics = tickerService.getStatistics();
-        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
-        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(1);
+        assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
+        assertThat(tickerStatistics.getCount()).isEqualTo(1);
     }
 
     @Test
@@ -76,8 +86,10 @@ public class TickerServiceTest {
 
         Thread.sleep(100);
         TickerStatistics tickerStatistics = tickerService.getStatistics();
-        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1 + PRICE2 + PRICE3)/3.);
-        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(3);
+        assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1 + PRICE2 + PRICE3)/3.);
+        assertThat(tickerStatistics.getMax()).isEqualTo(PRICE3);
+        assertThat(tickerStatistics.getMin()).isEqualTo(PRICE1);
+        assertThat(tickerStatistics.getCount()).isEqualTo(3);
     }
 
     @Test
@@ -90,14 +102,16 @@ public class TickerServiceTest {
 
         Thread.sleep(100);
         TickerStatistics tickerStatistics = tickerService.getStatistics();
-        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1+PRICE2+PRICE21+PRICE22)/4);
-        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(4);
+        assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1+PRICE2+PRICE21+PRICE22)/4);
+        assertThat(tickerStatistics.getCount()).isEqualTo(4);
 
         Optional<TickerStatistics> statistics2Opt = tickerService.getStatistics(INSTRUMENT2);
-        Assertions.assertThat(statistics2Opt).isNotEmpty();
+        assertThat(statistics2Opt).isNotEmpty();
         TickerStatistics tickerStatistics2 = statistics2Opt.get();
-        Assertions.assertThat(tickerStatistics2.getAvg()).isEqualTo((PRICE21+PRICE22)/2);
-        Assertions.assertThat(tickerStatistics2.getCount()).isEqualTo(2);
+        assertThat(tickerStatistics2.getAvg()).isEqualTo((PRICE21+PRICE22)/2);
+        assertThat(tickerStatistics2.getMax()).isEqualTo(PRICE22);
+        assertThat(tickerStatistics2.getMin()).isEqualTo(PRICE21);
+        assertThat(tickerStatistics2.getCount()).isEqualTo(2);
     }
 
     @Test
@@ -108,7 +122,7 @@ public class TickerServiceTest {
 
         Thread.sleep(100);
         TickerStatistics tickerStatistics = tickerService.getStatistics();
-        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
-        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(1);
+        assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
+        assertThat(tickerStatistics.getCount()).isEqualTo(1);
     }
 }
