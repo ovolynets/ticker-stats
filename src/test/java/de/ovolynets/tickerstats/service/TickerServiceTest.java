@@ -33,7 +33,7 @@ public class TickerServiceTest {
     }
 
     @Test
-    public void addSingleTickSuccessfully() throws InterruptedException {
+    public void addMultipleTicksSuccessfully() throws InterruptedException {
         long currentTimeInMillis = ZonedDateTime.now().toInstant().toEpochMilli();
         tickerService.addTick(new Tick(INSTRUMENT1, PRICE1, currentTimeInMillis - 1 * SECOND_TO_MILLIS));
         tickerService.addTick(new Tick(INSTRUMENT1, PRICE1, currentTimeInMillis - 2 * SECOND_TO_MILLIS));
@@ -45,6 +45,26 @@ public class TickerServiceTest {
         TickerStatistics tickerStatistics = tickerService.getStatistics();
         Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
         Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(3);
+    }
+
+    @Test
+    public void addSoonExpiringTicks() throws InterruptedException {
+        long currentTimeInMillis = ZonedDateTime.now().toInstant().toEpochMilli();
+        tickerService.addTick(new Tick(INSTRUMENT1, PRICE1, currentTimeInMillis - 1 * SECOND_TO_MILLIS));
+        // This tick is aboud to expire while statistics calculation
+        tickerService.addTick(new Tick(INSTRUMENT1, PRICE2, currentTimeInMillis - 60 * SECOND_TO_MILLIS + 150));
+
+        // First, both ticks contribute to the statistics
+        Thread.sleep(100);
+        TickerStatistics tickerStatistics = tickerService.getStatistics();
+        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo((PRICE1+PRICE2)/2);
+        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(2);
+
+        // After waiting for another 100ms another round of statistics rebuild and cleanup of old values has been run
+        Thread.sleep(100);
+        tickerStatistics = tickerService.getStatistics();
+        Assertions.assertThat(tickerStatistics.getAvg()).isEqualTo(PRICE1);
+        Assertions.assertThat(tickerStatistics.getCount()).isEqualTo(1);
     }
 
     @Test

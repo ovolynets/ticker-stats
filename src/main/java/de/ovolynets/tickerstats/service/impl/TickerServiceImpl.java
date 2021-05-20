@@ -79,6 +79,8 @@ public class TickerServiceImpl implements TickerService {
 
     private void removeEldestElements() {
         long now = ZonedDateTime.now().toInstant().toEpochMilli();
+        // Synchronize on the treeset to avoid concurrent modifications
+        // of the data while we traverse it with an iterator
         synchronized (dateTimeRecordsQueue) {
             Iterator<Long> iterator = dateTimeRecordsQueue.iterator();
             while (iterator.hasNext()) {
@@ -93,11 +95,22 @@ public class TickerServiceImpl implements TickerService {
     }
 
     private void rebuildStatisticsIndex() {
+        // Update the index/cache of the statistics. First remove irrelevant entries
+        // that are older than 60 seconds. After that, calculate the statistics
+        // while locking the data HashMap for concurrent modifications.
+        // Based on the expected traffic, this solution might not scale when the updates
+        // come too frequently. In such case, we might need to chunk updates and execute
+        // multiple updates at once instead of one-by-one, e.g. by implementing an async
+        // queue solution.
+
         logger.info("Statistics index will be rebuilt");
         removeEldestElements();
+
         Map<String, TickerAccumulator> indexOfPricesByInstrument = new HashMap<>();
         TickerAccumulator totalIndexAccumulator = new TickerAccumulator();
 
+        // We need to synchronize on the map once again to avoid concurrent modifications
+        // while we calculate the statistics
         synchronized (priceByDateTime) {
             for (Map<String, Double> entry: priceByDateTime.values()) {
                 for (String instrument : entry.keySet()) {
