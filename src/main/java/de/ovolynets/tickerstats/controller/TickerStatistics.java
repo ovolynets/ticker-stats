@@ -1,10 +1,12 @@
 package de.ovolynets.tickerstats.controller;
 
 public class TickerStatistics {
-    private final double avg;
-    private final double max;
-    private final double min;
-    private final long count;
+    private double avg;
+    private double max;
+    private double min;
+    private long count;
+
+    public TickerStatistics() {}
 
     public TickerStatistics(double avg, double max, double min, long count) {
         this.avg = avg;
