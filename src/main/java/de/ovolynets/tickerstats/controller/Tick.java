@@ -1,10 +1,19 @@
 package de.ovolynets.tickerstats.controller;
 
-import org.apache.logging.log4j.util.Strings;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class Tick {
+
+    @NotNull
+    @NotBlank(message = "Instrument must not be blank")
     private final String instrument;
+    @NotNull
+    @Min(value = 0, message = "Price must be positive")
     private final Double price;
+    @NotNull
+    @Min(value = 0, message = "Timestamp cannot be negative")
     private final Long timestamp;
 
     public Tick(String instrument, Double price, Long timestamp) {
@@ -25,11 +34,13 @@ public class Tick {
         return timestamp;
     }
 
-    public boolean isValid() {
-        return !(Strings.isEmpty(instrument) ||
-                price == null ||
-                price < 0 ||
-                timestamp == null ||
-                timestamp < 0);
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Tick{");
+        sb.append("instrument='").append(instrument).append('\'');
+        sb.append(", price=").append(price);
+        sb.append(", timestamp=").append(timestamp);
+        sb.append('}');
+        return sb.toString();
     }
 }
