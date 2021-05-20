@@ -14,13 +14,13 @@ servers:
 paths:
   /ticks:
     post:
-      description: Submit ticker data
+      summary: Submit ticker data
       requestBody:
+        description: Ticker data at a given moment in time
         content:
-          description: Ticker data at a given moment in time
           application/json:
             schema:
-              $ref: '#/components/schema/TickerPayload'
+              $ref: '#/components/schemas/TickerPayload'
       responses:
         200:
           description: OK
@@ -28,24 +28,17 @@ paths:
           description: Ticker data older than 60 seconds is ignored
   /statistics:
     get:
-      description: Return overall statistics on the ticker data for the past 60 seconds
-      parameters:
-        - name: id
-          description: unique identifier of the feature
-          in: path
-          required: true
-          schema:
-            type: string
+      summary: Return overall statistics on the ticker data for the past 60 seconds
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/StatisticsResponse'
   /statistics/{id}:
     get:
-      description: Return ticker statistics for a given instrument ID for the past 60 seconds
+      summary: Return ticker statistics for a given instrument ID for the past 60 seconds
       parameters:
         - name: id
           description: Unique identifier of the instrument
@@ -82,7 +75,7 @@ components:
           format: int64
           description: Timestamp of the data point
 
-    Response:
+    StatisticsResponse:
       type: "object"
       required:
       - "avg"
