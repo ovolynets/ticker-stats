@@ -38,9 +38,9 @@ public class APIController {
     @PostMapping(value = "/ticks", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> postTicks(@Valid @RequestBody Tick tick) {
         if (tickerService.addTick(tick)) {
-            return ResponseEntity.noContent().build();
-        } else {
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
+        } else {
+            return ResponseEntity.noContent().build();
         }
     }
 

@@ -25,12 +25,12 @@ class APIControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void checkPostSuccessful() throws Exception {
+    void checkPostOldTicker() throws Exception {
         mockMvc.perform(post("/api/ticks")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(SAMPLE_CONTENT))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

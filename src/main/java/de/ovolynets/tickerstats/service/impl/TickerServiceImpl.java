@@ -55,7 +55,9 @@ public class TickerServiceImpl implements TickerService {
         if (tick.getTimestamp() < now - SLIDING_WINDOW_MS) {
             return false;
         }
-        Map<String, Double> pricesAtDateTime = priceByDateTime.computeIfAbsent(tick.getTimestamp(), (ignored) -> new HashMap<>());
+        Map<String, Double> pricesAtDateTime = priceByDateTime.computeIfAbsent(
+                tick.getTimestamp(),
+                (ignored) -> new HashMap<>());
         pricesAtDateTime.put(tick.getInstrument(), tick.getPrice());
         dateTimeRecordsQueue.add(tick.getTimestamp());
 
@@ -88,8 +90,9 @@ public class TickerServiceImpl implements TickerService {
                 if (next > now - SLIDING_WINDOW_MS) {
                     break;
                 }
-                priceByDateTime.remove(next);
+                Map<String, Double> removed = priceByDateTime.remove(next);
                 iterator.remove();
+                logger.trace("Removing entries with timestamp {}: {}", next, removed);
             }
         }
     }
