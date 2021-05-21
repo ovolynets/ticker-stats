@@ -1,5 +1,6 @@
 package de.ovolynets.tickerstats.controller;
 
+import de.ovolynets.tickerstats.TickerServiceApp;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,7 +30,6 @@ class APIControllerTest {
         mockMvc.perform(post("/api/ticks")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(SAMPLE_CONTENT))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
