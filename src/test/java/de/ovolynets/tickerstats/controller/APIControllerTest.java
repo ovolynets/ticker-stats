@@ -1,6 +1,5 @@
 package de.ovolynets.tickerstats.controller;
 
-import de.ovolynets.tickerstats.TickerServiceApp;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

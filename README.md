@@ -9,14 +9,30 @@ to submit ticker prices for individual instruments and read statistics per instr
 ```
 mvn clean spring-boot:run
 
-curl localhost:8080/api/ticks -d '{"instrument": "IBM.N", "price": 143.82, "timestamp": 1478192204000}'
+curl localhost:8080/api/ticks -H "Content-Type: application/json" -d '{"instrument": "IBM.N", "price": 143.82, "timestamp": 1478192204000}'
 curl localhost:8080/api/statistics
 ```
 
 ## API documentation
 You can find the OpenAPI 3.0 definition in `api/ticker-api.yaml` file.
 
-## Tradeoffs, nice-to-haves, decisions, TODOs
+
+## Design considerations
+
+1. Entry point is APIController that defines the routes of the application starting with a base path of `/api`
+2. The core of the application is `TickerService` (interface) and its implementation of `TickerServiceImpl`
+3. The application keep track of the price information in a combination of HashMap
+(structure: timestamp -> Map (instrument -> price)) and a sorted set of available timestamps to make the deletion of
+old entries efficient. Old entries are deleted in regular intervals. Statistics is also updated in regular intervals
+(same as deletion of old entries) and is stored in a cached variable that is used to return the result in O(1) time.
+Also see comments in TickerServiceImpl class.
+4. Cleanup of old entries happens in regular intervals in a separate thread by a spring-scheduled executor service.
+For this implementation, this interval is set to 500ms - subject to adjustments based on more detailed specifications.
+Relevant data structures are synchronized to not allow for parallel updates - again, subject for adjustments,
+see the notes on traffic considerations below.
+
+
+### Tradeoffs, nice-to-haves, decisions, TODOs
 
 1. Traffic considerations and immediate possible improvements. The implemented solution should work fine with
    traffic up to, say, 1,000 rps on updates and about 10,000 rps on reading the statistics
@@ -43,9 +59,9 @@ You can find the OpenAPI 3.0 definition in `api/ticker-api.yaml` file.
      relax the condition for getting statistics in O(1) time in the requirements and calculate it on-the-fly.
      This would reduce CPU usage but of course this will potentially require re-negotiations of the requirements.
 3. Testing. There are two tests:
-  - basic controller test that is mostly to check that spring boot starts and that expected response types
+   - basic controller test that is mostly to check that spring boot starts and that expected response types
     are as should be. It doesn't check the business logic, for which there are better and more detailed unit tests.
-  - unit test for the core TickerService to check for all possible scenarios. It does check also that the old entries
+   - unit test for the core TickerService to check for all possible scenarios. It does check also that the old entries
     older than 60 seconds expire, although sub-optimal using Thread.sleep(). This can be changed by considering slight
     redesign based on traffic consideration (see above).
 4. BigDecimal vs double - we might (or even should) use BigDecimal for price calculations. There are no sophisticated
@@ -56,16 +72,16 @@ You can find the OpenAPI 3.0 definition in `api/ticker-api.yaml` file.
    running and in case there are errors. Here it should be done with caution so not to print too many messages/errors
    which might explode the logfile in case of high traffic.
 
-Minor comments to the presented solution:
+### Minor comments to the presented solution:
 1. I didn't use annotations processors (lombok) for boilerplate code reduction - is a personal preference but can
    be done of course
 2. Concurrency is not tested by unit tests, although it would be nice to stress-test it a bit.
 3. It might be a good idea to move the sliding window of 60 seconds as a configuration parameter.
 
-Long-term improvements
+### Long-term improvements
 1. Performance/stress test - definitely. Concurrency check, possibly stress testing to estimate the
    highest possible traffic.
 2. Monitoring - would be good to expose the health of the system such as current traffic, CPU/memory metrics,
    success rates, as well as KPIs, maybe the fraction of old ticker data, as well as usage of the internal data
-   structure resources (how big is the HashMap etc.)
+   structure resources (how big is the HashMap cache etc.)
 3. Authentication - would be needed for a real-life application, such as OAuth.
